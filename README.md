@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>Enterprise-grade backup management with advanced security and multi-user support</strong>
+  <strong>Backup management with advanced security and multi-user support</strong>
 </p>
 
 <p align="center">
@@ -17,15 +17,15 @@
 
 ---
 
-## 🚀 Overview
+## Overview
 
 **Spectre** is a secure, web-based backup management system that enables organizations to centrally manage automated backups of remote servers via SSH/SFTP. Built with Flask and designed for production environments, it features AES-256 encryption, two-factor authentication, role-based access control, and comprehensive audit logging.
 
 ![Dashboard](docs/images/dashboard.png)
 
-## ✨ Key Features
+## Key Features
 
-### 🔐 Security First
+### Security First
 - **AES-256 Encrypted Backups** - Password-protected ZIP archives
 - **Two-Factor Authentication** - TOTP-based (Google Authenticator, Authy)
 - **Encrypted Credential Storage** - Fernet encryption for server passwords and SSH keys
@@ -33,14 +33,14 @@
 - **Complete Audit Logging** - Track all user actions and system events
 - **HTTPS Enforcement** - Let's Encrypt integration or self-signed certificates
 
-### 📊 Backup Management
+### Backup Management
 - **Flexible Scheduling** - Daily, weekly, or manual execution
 - **Automated Retention** - Configurable cleanup policies
 - **One-Click Restoration** - Restore backups directly to source servers
 - **Real-time Monitoring** - Track backup status and disk usage
 - **Multi-Server Support** - Manage unlimited remote servers
 
-### 👥 Multi-User Architecture
+### Multi-User Architecture
 - **Role-Based Access Control** - Admin and User roles
 - **Complete Tenant Isolation** - Users only see their own resources
 - **User Management** - Lifecycle management with audit trails
@@ -48,7 +48,7 @@
 
 ![Servers Management](docs/images/servers.png)
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 - **Backend**: Flask 3.0, SQLAlchemy, Flask-Login
 - **Security**: cryptography (Fernet), pyotp, pyzipper
@@ -57,7 +57,7 @@
 - **Production**: Gunicorn, Nginx, Systemd, Fail2Ban
 - **Database**: SQLite (default), PostgreSQL/MySQL compatible
 
-## 📦 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.10+
@@ -90,7 +90,7 @@ Access the application at `http://localhost:5000`
 
 ![Backups](docs/images/backups.png)
 
-## 🚀 Production Deployment
+## Production Deployment
 
 Spectre includes an automated installation script for production environments:
 
@@ -113,7 +113,7 @@ The installer will:
 - Configure backup retention policies
 - Add remote servers and create routines
 
-## 📖 Usage
+## Usage
 
 ### 1. Add Remote Servers
 Configure servers with SSH credentials (password or key-based authentication).
@@ -126,7 +126,7 @@ Track backup execution in real-time and restore with one click.
 
 ![Routines](docs/images/routines.png)
 
-## 🔒 Security Features
+## Security Features
 
 - **Input Validation** - Comprehensive sanitization for all user inputs
 - **Path Traversal Prevention** - Secure file path validation
@@ -136,7 +136,7 @@ Track backup execution in real-time and restore with one click.
 - **HTTPS Only** - Automatic HTTP → HTTPS redirection
 - **Security Headers** - CSP, HSTS, X-Frame-Options, X-Content-Type-Options
 
-## 📊 System Requirements
+## System Requirements
 
 ### Minimum
 - 2 CPU cores
@@ -149,35 +149,15 @@ Track backup execution in real-time and restore with one click.
 - SSD storage for database
 - Separate volume for backups
 
-## 🤝 Contributing
+## Contributions are welcome!
+## Report vulnerabilities via email to security@yourdomain.com
 
-Contributions are welcome! Please follow these guidelines:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Flask framework and community
-- Paramiko for SSH/SFTP implementation
-- APScheduler for job scheduling
-- All contributors and users
-
-## 📧 Support
-
-- **Documentation**: [Wiki](https://github.com/yourusername/spectre/wiki)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/spectre/issues)
-- **Security**: Report vulnerabilities via email to security@yourdomain.com
 
 ---
 
 <p align="center">
-  Made with ❤️ by the Spectre Team
+  Made by Syrus
 </p>
