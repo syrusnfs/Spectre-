@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Add Server - Spectre{% endblock %}
+{% block page_title %}Add Server{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-server"></i> Configure New Server
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Server Name *</label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="e.g., Production Server">
+                        <small class="form-text text-muted">Identifying name for this server</small>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="host" class="form-label">Host / IP *</label>
+                                <input type="text" class="form-control" id="host" name="host" required placeholder="192.168.1.100 or server.example.com">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="port" class="form-label">SSH Port *</label>
+                                <input type="number" class="form-control" id="port" name="port" value="22" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username *</label>
+                        <input type="text" class="form-control" id="username" name="username" required placeholder="root or SSH username">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Authentication Type *</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="auth_type" id="auth_password" value="password" checked>
+                            <label class="btn btn-outline-primary" for="auth_password">
+                                <i class="bi bi-key"></i> Password
+                            </label>
+
+                            <input type="radio" class="btn-check" name="auth_type" id="auth_key" value="key">
+                            <label class="btn btn-outline-primary" for="auth_key">
+                                <i class="bi bi-file-earmark-lock"></i> SSH Key
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="password_field">
+                        <label for="password" class="form-label">Password *</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="SSH access password">
+                        <small class="form-text text-muted">The password will be stored securely</small>
+                    </div>
+
+                    <div class="mb-3" id="key_field" style="display: none;">
+                        <label for="ssh_key" class="form-label">Private SSH Key *</label>
+                        <textarea class="form-control" id="ssh_key" name="ssh_key" rows="10" placeholder="-----BEGIN RSA PRIVATE KEY-----
+...
+-----END RSA PRIVATE KEY-----"></textarea>
+                        <small class="form-text text-muted">Paste the contents of your private SSH key file here</small>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> <strong>Tip:</strong> Ensure the server allows SSH connections and that the credentials are correct.
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('servers.servers') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Save Server
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('input[name="auth_type"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const passwordField = document.getElementById('password_field');
+        const keyField = document.getElementById('key_field');
+        const passwordInput = document.getElementById('password');
+        const keyInput = document.getElementById('ssh_key');
+
+        if (this.value === 'password') {
+            passwordField.style.display = 'block';
+            keyField.style.display = 'none';
+            passwordInput.required = true;
+            keyInput.required = false;
+        } else {
+            passwordField.style.display = 'none';
+            keyField.style.display = 'block';
+            passwordInput.required = false;
+            keyInput.required = true;
+        }
+    });
+});
+</script>
+{% endblock %}

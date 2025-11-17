@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}New Routine - Spectre{% endblock %}
+{% block page_title %}New Backup Routine{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-plus-circle"></i> Create New Backup Routine
+            </div>
+            <div class="card-body">
+                {% if not servers %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> You need to add at least one server before creating a routine.
+                    <a href="{{ url_for('servers.add_server') }}" class="alert-link">Add server now</a>
+                </div>
+                {% else %}
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Routine Name *</label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="E.g.: Daily Documents Backup">
+                        <small class="form-text text-muted">Identifying name for this routine</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="server_id" class="form-label">Server *</label>
+                        <select class="form-select" id="server_id" name="server_id" required>
+                            <option value="">Select a server...</option>
+                            {% for server in servers %}
+                            <option value="{{ server.id }}">{{ server.name }} ({{ server.host }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="remote_path" class="form-label">Remote Path *</label>
+                        <input type="text" class="form-control" id="remote_path" name="remote_path" required placeholder="/var/www/html">
+                        <small class="form-text text-muted">Directory on the remote server to be backed up</small>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Backup Directory:</strong> Backups will be automatically saved to the directory configured during installation.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="schedule_type" class="form-label">Schedule Type *</label>
+                                <select class="form-select" id="schedule_type" name="schedule_type" required>
+                                    <option value="manual">Manual</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="schedule_time" class="form-label">Time</label>
+                                <input type="time" class="form-control" id="schedule_time" name="schedule_time" placeholder="00:00">
+                                <small class="form-text text-muted">Leave empty for manual execution</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="retention_days" class="form-label">Retention (days) *</label>
+                        <input type="number" class="form-control" id="retention_days" name="retention_days" value="30" required min="1">
+                        <small class="form-text text-muted">Backups older than this period will be automatically removed</small>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="enabled" name="enabled" checked>
+                        <label class="form-check-label" for="enabled">
+                            Enable this routine
+                        </label>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> <strong>Note:</strong> Automatic schedules are executed automatically by the application while it is running. No external services need to be configured.
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('routines.routines') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Create Routine
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/add_routine.js') }}"></script>
+{% endblock %}

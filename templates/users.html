@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Users - Spectre{% endblock %}
+{% block page_title %}User Management{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-people"></i> System Users</span>
+        <a href="{{ url_for('users.add_user') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle"></i> Add User
+        </a>
+    </div>
+    <div class="card-body">
+        {% if users %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th class="text-center">2FA</th>
+                        <th>Servers</th>
+                        <th>Routines</th>
+                        <th>Created Date</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>
+                            <i class="bi bi-person-circle"></i> {{ user.username }}
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if user.is_admin() %}
+                            <span class="badge bg-secondary">
+                                <i class="bi bi-shield-fill-exclamation"></i> Admin
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary">
+                                <i class="bi bi-person"></i> User
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if user.otp_enabled %}
+                            <i class="bi bi-check-circle-fill text-success" style="font-size: 1.5rem;" title="2FA Enabled"></i>
+                            {% else %}
+                            <i class="bi bi-x-circle-fill text-danger" style="font-size: 1.5rem;" title="2FA Disabled"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">{{ user.servers|length }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">{{ user.routines|length }}</span>
+                        </td>
+                        <td>{{ user.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td class="text-end">
+                            <a href="{{ url_for('users.change_user_password', id=user.id) }}" class="btn btn-sm btn-outline-primary" title="Change Password">
+                                <i class="bi bi-key"></i>
+                            </a>
+                            <a href="{{ url_for('users.view_user_backup_key', id=user.id) }}" class="btn btn-sm btn-outline-warning" title="View Backup Key">
+                                <i class="bi bi-lock-fill"></i>
+                            </a>
+                            <a href="{{ url_for('users.setup_2fa_user', user_id=user.id) }}" class="btn btn-sm btn-outline-info" title="Configure 2FA">
+                                <i class="bi bi-shield-lock"></i>
+                            </a>
+                            {% if user.id != current_user.id %}
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteUser({{ user.id }})" title="Remove">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="mt-3 text-muted">No users found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal for OTP verification and BACKUP_PASSWORD display -->
+<div class="modal fade" id="backupPasswordModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="bi bi-key-fill"></i> BACKUP_PASSWORD - Secure Access</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="otpVerificationStep">
+                    <div class="alert alert-info">
+                        <i class="bi bi-shield-check"></i>
+                        <strong>Authentication Required:</strong> To view the BACKUP_PASSWORD, you must have 2FA enabled and provide the OTP code.
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="otpCode" class="form-label">OTP Code (6 digits)</label>
+                        <input type="text"
+                               class="form-control form-control-lg text-center"
+                               id="otpCode"
+                               maxlength="6"
+                               pattern="[0-9]{6}"
+                               placeholder="000000"
+                               style="letter-spacing: 0.5em; font-size: 1.5rem;">
+                        <div class="form-text">
+                            Enter the code generated by your authenticator application
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-warning" onclick="verifyOtpAndShowPassword()">
+                        <i class="bi bi-unlock"></i> Verify and Show Password
+                    </button>
+                </div>
+
+                <div id="passwordDisplayStep" style="display: none;">
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <strong>Verification successful!</strong> Valid OTP code.
+                    </div>
+
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="text-muted mb-3">
+                                <i class="bi bi-shield-lock-fill"></i> BACKUP_PASSWORD (AES-256)
+                            </h6>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-warning">
+                                    <i class="bi bi-key-fill"></i>
+                                </span>
+                                <input type="text"
+                                       class="form-control"
+                                       id="backupPasswordField"
+                                       readonly
+                                       style="font-family: monospace; font-size: 1.1rem;">
+                                <button class="btn btn-outline-warning" type="button" onclick="copyBackupPassword()" title="Copy password">
+                                    <i class="bi bi-clipboard" id="copyBackupIcon"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted mt-2 d-block">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <strong>CRITICAL:</strong> This password encrypts all backups. Store it in a secure password vault!
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="no2faWarning" style="display: none;">
+                    <div class="alert alert-danger">
+                        <i class="bi bi-shield-x"></i>
+                        <strong>2FA Not Configured!</strong> To view the BACKUP_PASSWORD, you must have two-factor authentication enabled.
+                    </div>
+                    <p class="text-muted">
+                        Viewing the BACKUP_PASSWORD is a sensitive operation that requires additional authentication.
+                        Enable 2FA for your account first.
+                    </p>
+                    <a href="{{ url_for('users.setup_2fa_user', user_id=current_user.id) }}" class="btn btn-info">
+                        <i class="bi bi-shield-lock"></i> Configure 2FA Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/users.js') }}"></script>
+
+<script>
+// Allow only numbers in OTP input
+document.getElementById('otpCode')?.addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^0-9]/g, '');
+});
+
+function showBackupPassword() {
+    // Check if user has 2FA enabled
+    {% if current_user.otp_enabled %}
+        // Reset modal
+        document.getElementById('otpVerificationStep').style.display = 'block';
+        document.getElementById('passwordDisplayStep').style.display = 'none';
+        document.getElementById('no2faWarning').style.display = 'none';
+        document.getElementById('otpCode').value = '';
+
+        const modal = new bootstrap.Modal(document.getElementById('backupPasswordModal'));
+        modal.show();
+    {% else %}
+        // Show 2FA not configured warning
+        document.getElementById('otpVerificationStep').style.display = 'none';
+        document.getElementById('passwordDisplayStep').style.display = 'none';
+        document.getElementById('no2faWarning').style.display = 'block';
+
+        const modal = new bootstrap.Modal(document.getElementById('backupPasswordModal'));
+        modal.show();
+    {% endif %}
+}
+
+function verifyOtpAndShowPassword() {
+    const otpCode = document.getElementById('otpCode').value;
+
+    if (otpCode.length !== 6) {
+        alert('Please enter a 6-digit OTP code');
+        return;
+    }
+
+    // Make request to verify OTP and get BACKUP_PASSWORD
+    fetch('/users/verify-otp-backup-password', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ otp_code: otpCode })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show password
+            document.getElementById('backupPasswordField').value = data.backup_password;
+            document.getElementById('otpVerificationStep').style.display = 'none';
+            document.getElementById('passwordDisplayStep').style.display = 'block';
+        } else {
+            alert('Invalid OTP code. Please try again.');
+            document.getElementById('otpCode').value = '';
+            document.getElementById('otpCode').focus();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error verifying OTP code');
+    });
+}
+
+function copyBackupPassword() {
+    const passwordField = document.getElementById('backupPasswordField');
+    const copyIcon = document.getElementById('copyBackupIcon');
+
+    // Copy to clipboard
+    passwordField.select();
+    passwordField.setSelectionRange(0, 99999);
+
+    navigator.clipboard.writeText(passwordField.value).then(function() {
+        // Visual feedback
+        copyIcon.classList.remove('bi-clipboard');
+        copyIcon.classList.add('bi-clipboard-check', 'text-success');
+
+        // Restore icon after 2 seconds
+        setTimeout(function() {
+            copyIcon.classList.remove('bi-clipboard-check', 'text-success');
+            copyIcon.classList.add('bi-clipboard');
+        }, 2000);
+    }).catch(function(err) {
+        // Fallback for older browsers
+        document.execCommand('copy');
+        copyIcon.classList.remove('bi-clipboard');
+        copyIcon.classList.add('bi-clipboard-check', 'text-success');
+        setTimeout(function() {
+            copyIcon.classList.remove('bi-clipboard-check', 'text-success');
+            copyIcon.classList.add('bi-clipboard');
+        }, 2000);
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Add User - Spectre{% endblock %}
+{% block page_title %}Add User{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-person-plus"></i> Create New User
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username *</label>
+                        <input type="text" class="form-control" id="username" name="username" required placeholder="e.g., john.smith">
+                        <small class="form-text text-muted">Unique name to identify the user</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="email" name="email" required placeholder="example@domain.com">
+                        <small class="form-text text-muted">User's email address</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password *</label>
+                        <input type="password" class="form-control" id="password" name="password" required minlength="6">
+                        <small class="form-text text-muted">Minimum 6 characters</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password_confirm" class="form-label">Confirm Password *</label>
+                        <input type="password" class="form-control" id="password_confirm" name="password_confirm" required minlength="6">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role / Access Level *</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="user" selected>User - Standard Access</option>
+                            <option value="admin">Admin - Full Access</option>
+                        </select>
+                        <small class="form-text text-muted">
+                            <strong>User:</strong> Can manage their own servers, routines, and backups<br>
+                            <strong>Admin:</strong> Can manage all users and delete system logs
+                        </small>
+                    </div>
+
+                    <div class="alert alert-warning" id="adminWarning" style="display: none;">
+                        <i class="bi bi-exclamation-triangle"></i> <strong>Warning:</strong> Users with <strong>Admin</strong> role will have full system access, including management of other users and deletion of logs.
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('users.users') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Create User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const addUserForm = document.querySelector('form');
+const roleSelect = document.getElementById('role');
+const adminWarning = document.getElementById('adminWarning');
+let otpVerified = false;
+
+// Show warning when selecting Admin
+roleSelect.addEventListener('change', function() {
+    if (this.value === 'admin') {
+        adminWarning.style.display = 'block';
+    } else {
+        adminWarning.style.display = 'none';
+    }
+});
+
+addUserForm.addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const passwordConfirm = document.getElementById('password_confirm').value;
+
+    if (password !== passwordConfirm) {
+        e.preventDefault();
+        alert('Passwords do not match!');
+        return false;
+    }
+
+    // If OTP already verified, allow submission
+    if (otpVerified) {
+        return true;
+    }
+
+    // Prevent submission and request OTP
+    e.preventDefault();
+
+    // Request OTP before submitting
+    requireOTP(function() {
+        otpVerified = true;
+        addUserForm.submit();
+    });
+
+    return false;
+});
+</script>
+{% endblock %}

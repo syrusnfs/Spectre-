@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Servers - Spectre{% endblock %}
+{% block page_title %}Remote Servers{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-server"></i> Configured Servers</span>
+        <a href="{{ url_for('servers.add_server') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle"></i> Add Server
+        </a>
+    </div>
+    <div class="card-body">
+        {% if servers %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Host</th>
+                        <th>Port</th>
+                        <th>Username</th>
+                        <th>Authentication</th>
+                        {% if current_user.is_admin() %}
+                        <th>Owner</th>
+                        {% endif %}
+                        <th>Creation Date</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for server in servers %}
+                    <tr>
+                        <td><strong>{{ server.name }}</strong></td>
+                        <td><code class="text-white">{{ server.host }}</code></td>
+                        <td>{{ server.port }}</td>
+                        <td>{{ server.username }}</td>
+                        <td>
+                            {% if server.auth_type == 'password' %}
+                            <span class="badge bg-info"><i class="bi bi-key"></i> Password</span>
+                            {% else %}
+                            <span class="badge bg-success"><i class="bi bi-file-earmark-lock"></i> SSH Key</span>
+                            {% endif %}
+                        </td>
+                        {% if current_user.is_admin() %}
+                        <td>
+                            <i class="bi bi-person-circle"></i> {{ server.user.username }}
+                        </td>
+                        {% endif %}
+                        <td>{{ server.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td class="text-end">
+                            <a href="{{ url_for('servers.edit_server', id=server.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteServer({{ server.id }})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-server" style="font-size: 3rem; color: #ccc;"></i>
+            <p class="mt-3 text-muted">No servers configured yet.</p>
+            <a href="{{ url_for('servers.add_server') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add First Server
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<form id="deleteForm" method="POST" style="display: none;">
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function deleteServer(id) {
+    showConfirmModal(
+        'Delete Server',
+        'Are you sure you want to remove this server? This action cannot be undone.',
+        function() {
+            // Request OTP before executing
+            requireOTP(function() {
+                const form = document.getElementById('deleteForm');
+                form.action = '/servers/delete/' + id;
+                form.submit();
+            });
+        }
+    );
+}
+</script>
+{% endblock %}

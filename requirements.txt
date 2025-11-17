@@ -1,0 +1,28 @@
+# Core Flask Framework
+Flask==3.0.0
+Werkzeug==3.0.1
+
+# Flask Extensions
+Flask-Login==0.6.3
+Flask-SQLAlchemy==3.1.1
+
+# Security & Authentication
+cryptography==41.0.7
+pyotp==2.9.0
+pyzipper==0.3.6
+
+# SSH & File Transfer
+paramiko==3.4.0
+
+# Scheduling
+APScheduler==3.10.4
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# QR Code Generation (for 2FA)
+qrcode==7.4.2
+Pillow==10.1.0
+
+# Production Server (WSGI)
+gunicorn==21.2.0

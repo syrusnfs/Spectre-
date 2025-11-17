@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Spectre{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/logo.png') }}">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <div class="sidebar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+            <i class="bi bi-shield-check" style="display:none;"></i>
+            <span>Spectre</span>
+        </div>
+        <nav class="nav flex-column mt-3">
+            <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" href="{{ url_for('main.index') }}">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a class="nav-link {% if request.endpoint in ['servers.servers', 'servers.add_server', 'servers.edit_server'] %}active{% endif %}" href="{{ url_for('servers.servers') }}">
+                <i class="bi bi-server"></i> Servers
+            </a>
+            <a class="nav-link {% if request.endpoint in ['routines.routines', 'routines.add_routine', 'routines.edit_routine'] %}active{% endif %}" href="{{ url_for('routines.routines') }}">
+                <i class="bi bi-clock-history"></i> Routines
+            </a>
+            <a class="nav-link {% if request.endpoint == 'backups.backups' %}active{% endif %}" href="{{ url_for('backups.backups') }}">
+                <i class="bi bi-archive"></i> Backups
+            </a>
+            <a class="nav-link {% if request.endpoint == 'logs.logs' %}active{% endif %}" href="{{ url_for('logs.logs') }}">
+                <i class="bi bi-file-text"></i> Logs
+            </a>
+            {% if current_user.is_admin() %}
+            <a class="nav-link {% if request.endpoint in ['users.users', 'users.add_user', 'users.edit_user', 'users.setup_2fa_user'] %}active{% endif %}" href="{{ url_for('users.users') }}">
+                <i class="bi bi-people"></i> Users
+            </a>
+            {% endif %}
+            <hr class="my-2" style="border-color: rgba(255,255,255,0.1);">
+            <a class="nav-link {% if request.endpoint == 'profile.view_my_backup_key' %}active{% endif %}" href="{{ url_for('profile.view_my_backup_key') }}">
+                <i class="bi bi-lock-fill"></i> Backup Key
+            </a>
+        </nav>
+        <div style="position: absolute; bottom: 20px; width: 100%; padding: 0 1rem;">
+            <a class="nav-link" href="{{ url_for('auth.logout') }}">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="main-content">
+        {% if current_user.is_authenticated %}
+        <div class="top-bar">
+            <div>
+                <h4 class="mb-0">{% block page_title %}Dashboard{% endblock %}</h4>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">
+                    {{ current_user.username[0].upper() }}
+                </div>
+                <span>{{ current_user.username }}</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="content-area">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+
+        <!-- Footer -->
+        {% if current_user.is_authenticated %}
+        <footer class="footer">
+            <p class="mb-0">&copy; {{ now().year }} <strong>Spectre</strong>. All rights reserved.</p>
+        </footer>
+        {% endif %}
+    </div>
+
+    <!-- Universal Confirmation Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle text-warning"></i>
+                        <span id="confirmModalTitle">Confirm Action</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmModalMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmModalBtn">
+                        <i class="bi bi-check-circle"></i> Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span id="successModalTitle">Success</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="successModalMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="successModalBtn" data-bs-dismiss="modal">
+                        <i class="bi bi-check"></i> OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        <span id="errorModalTitle">Error</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorModalMessage" style="white-space: pre-wrap;"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                        <i class="bi bi-x"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OTP Verification Modal -->
+    <div class="modal fade" id="otpVerificationModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title">
+                        <i class="bi bi-shield-lock"></i>
+                        2FA Verification
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">
+                        <i class="bi bi-info-circle"></i>
+                        This action requires two-factor authentication. Enter the code from your authenticator app.
+                    </p>
+                    <div class="mb-3">
+                        <label for="otpCodeInput" class="form-label">OTP Code</label>
+                        <input type="text" class="form-control text-center" id="otpCodeInput" maxlength="6"
+                               placeholder="000000" autocomplete="off" inputmode="numeric" pattern="[0-9]*">
+                        <div class="invalid-feedback" id="otpError"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x"></i> Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" id="otpVerifyBtn">
+                        <i class="bi bi-check-circle"></i> Verify
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Auto-dismiss flash messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+        });
+
+        // Universal function to confirm actions
+        function showConfirmModal(title, message, onConfirm, confirmButtonText = 'Confirm', confirmButtonClass = 'btn-danger') {
+            document.getElementById('confirmModalTitle').textContent = title;
+            document.getElementById('confirmModalMessage').innerHTML = message;
+
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            const confirmBtn = document.getElementById('confirmModalBtn');
+
+            // Update button text and class
+            confirmBtn.textContent = confirmButtonText;
+            confirmBtn.className = 'btn ' + confirmButtonClass;
+
+            // Remove old listeners
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+            // Add new listener
+            newConfirmBtn.addEventListener('click', function() {
+                modal.hide();
+                onConfirm();
+            });
+
+            modal.show();
+        }
+
+        // Function to show success modal
+        function showSuccessModal(title, message, onClose) {
+            document.getElementById('successModalTitle').textContent = title;
+            document.getElementById('successModalMessage').innerHTML = message;
+
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            const successBtn = document.getElementById('successModalBtn');
+
+            // Remove old listeners
+            const newSuccessBtn = successBtn.cloneNode(true);
+            successBtn.parentNode.replaceChild(newSuccessBtn, successBtn);
+
+            // Add new listener if provided
+            if (onClose) {
+                newSuccessBtn.addEventListener('click', function() {
+                    modal.hide();
+                    onClose();
+                });
+                // Also execute when closing the modal
+                document.getElementById('successModal').addEventListener('hidden.bs.modal', function() {
+                    onClose();
+                }, { once: true });
+            }
+
+            modal.show();
+        }
+
+        // Function to show error modal
+        function showErrorModal(title, message) {
+            document.getElementById('errorModalTitle').textContent = title;
+            document.getElementById('errorModalMessage').textContent = message;
+
+            const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+            modal.show();
+        }
+
+        // Global variable to store pending action
+        let pendingAction = null;
+
+        // Function to check if user has 2FA
+        const userHas2FA = {{ 'true' if current_user.is_authenticated and current_user.otp_enabled else 'false' }};
+
+        // Function to require OTP before critical actions
+        function requireOTP(actionCallback) {
+            if (!userHas2FA) {
+                showErrorModal('2FA Not Configured', 'Critical actions require two-factor authentication. Please configure 2FA first.');
+                return;
+            }
+
+            pendingAction = actionCallback;
+            const otpModal = new bootstrap.Modal(document.getElementById('otpVerificationModal'));
+            const otpInput = document.getElementById('otpCodeInput');
+            const otpError = document.getElementById('otpError');
+
+            // Clear field and error
+            otpInput.value = '';
+            otpInput.classList.remove('is-invalid');
+            otpError.textContent = '';
+
+            // Focus on input when modal opens
+            document.getElementById('otpVerificationModal').addEventListener('shown.bs.modal', function() {
+                otpInput.focus();
+            }, { once: true });
+
+            otpModal.show();
+        }
+
+        // Handler to verify OTP
+        document.addEventListener('DOMContentLoaded', function() {
+            const otpInput = document.getElementById('otpCodeInput');
+            const otpVerifyBtn = document.getElementById('otpVerifyBtn');
+            const otpError = document.getElementById('otpError');
+
+            // Allow only numbers
+            otpInput.addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            // Verify on Enter key press
+            otpInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    otpVerifyBtn.click();
+                }
+            });
+
+            // Verify OTP
+            otpVerifyBtn.addEventListener('click', function() {
+                const otpCode = otpInput.value.trim();
+
+                if (otpCode.length !== 6) {
+                    otpInput.classList.add('is-invalid');
+                    otpError.textContent = 'The code must be 6 digits';
+                    return;
+                }
+
+                // Disable button during verification
+                otpVerifyBtn.disabled = true;
+                otpVerifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verifying...';
+
+                // Send OTP for verification
+                fetch('/verify_otp_action', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ otp_code: otpCode })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Valid OTP - close modal and execute action
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('otpVerificationModal'));
+                        modal.hide();
+
+                        // Execute pending action
+                        if (pendingAction) {
+                            pendingAction();
+                            pendingAction = null;
+                        }
+                    } else {
+                        // Invalid OTP
+                        otpInput.classList.add('is-invalid');
+                        otpError.textContent = data.message || 'Incorrect OTP code';
+                        otpInput.value = '';
+                        otpInput.focus();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    otpInput.classList.add('is-invalid');
+                    otpError.textContent = 'Error verifying OTP. Please try again.';
+                })
+                .finally(() => {
+                    // Re-enable button
+                    otpVerifyBtn.disabled = false;
+                    otpVerifyBtn.innerHTML = '<i class="bi bi-check-circle"></i> Verify';
+                });
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

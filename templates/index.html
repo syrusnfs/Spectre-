@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Spectre{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card stat-card-servers">
+            <p class="mb-2"><i class="bi bi-server"></i> Servers</p>
+            <h3>{{ total_servers }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card stat-card-routines">
+            <p class="mb-2"><i class="bi bi-clock-history"></i> Routines</p>
+            <h3>{{ total_routines }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card stat-card-backups">
+            <p class="mb-2"><i class="bi bi-archive"></i> Backups</p>
+            <h3>{{ total_backups }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card stat-card-status">
+            <p class="mb-2"><i class="bi bi-hdd"></i> Free Space</p>
+            <h3>{{ "%.1f"|format(disk_free) }} GB</h3>
+            <small class="disk-info">
+                <i class="bi bi-pie-chart"></i> {{ "%.1f"|format(disk_used) }} GB / {{ "%.1f"|format(disk_total) }} GB ({{ "%.1f"|format(disk_percent) }}%)
+            </small>
+        </div>
+    </div>
+</div>
+
+{% if not current_user.otp_enabled %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-warning d-flex align-items-center" role="alert">
+            <i class="bi bi-shield-exclamation fs-4 me-3"></i>
+            <div>
+                <strong>Account Security</strong>
+                <p class="mb-0">
+                    To enhance your security and enjoy all features of this application, enable 2FA <a href="{{ url_for('users.setup_2fa_user', user_id=current_user.id) }}" class="alert-link">here</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clock-history"></i> Recent Logs
+            </div>
+            <div class="card-body">
+                {% if recent_logs %}
+                <div class="list-group list-group-flush">
+                    {% for log in recent_logs %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                {% if log.level == 'error' %}
+                                <span class="badge bg-danger"><i class="bi bi-x-circle"></i></span>
+                                {% elif log.level == 'warning' %}
+                                <span class="badge bg-warning"><i class="bi bi-exclamation-triangle"></i></span>
+                                {% else %}
+                                <span class="badge bg-success"><i class="bi bi-info-circle"></i></span>
+                                {% endif %}
+                                <small class="ms-2">{{ log.message }}</small>
+                            </div>
+                            <small class="text-muted">{{ log.timestamp.strftime('%H:%M:%S') }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="{{ url_for('logs.logs') }}" class="btn btn-sm btn-outline-primary mt-3">View all logs</a>
+                {% else %}
+                <p class="text-muted mb-0">No logs yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-info-circle"></i> Welcome to Spectre
+            </div>
+            <div class="card-body">
+                <h5>Getting Started:</h5>
+                <ol>
+                    <li><strong>Add a remote server</strong> - Configure the access credentials for the server you want to backup</li>
+                    <li><strong>Create a backup routine</strong> - Define what to backup and when</li>
+                    <li><strong>Execute or schedule</strong> - Run manually or let the system execute automatically</li>
+                    <li><strong>Monitor</strong> - Track the status of backups and logs</li>
+                </ol>
+                <p class="mb-0 text-muted">
+                    <i class="bi bi-shield-check"></i> Your data is safe and secure.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

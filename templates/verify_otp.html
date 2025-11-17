@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2FA Verification - Spectre</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .otp-input {
+            font-size: 1.5rem;
+            text-align: center;
+            letter-spacing: 0.5rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <img src="{{ url_for('static', filename='img/logo.png') }}"
+                     alt="Logo"
+                     onerror="this.style.display='none'; document.getElementById('fallback-icon').style.display='block';">
+                <i id="fallback-icon" class="bi bi-shield-lock fallback-icon" style="display:none;"></i>
+            </div>
+
+            <h4 class="text-center mb-4">Two-Factor Authentication</h4>
+            <p class="text-muted text-center mb-4">
+                Enter the 6-digit code from your authenticator app
+            </p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <div class="mb-4">
+                    <label for="otp_code" class="form-label">OTP Code</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
+                        <input type="text"
+                               class="form-control form-control-lg otp-input"
+                               id="otp_code"
+                               name="otp_code"
+                               maxlength="6"
+                               pattern="[0-9]{6}"
+                               placeholder="000000"
+                               required
+                               autofocus>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    <i class="bi bi-check-circle"></i> Verify
+                </button>
+
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('auth.login') }}" class="text-muted">
+                        <i class="bi bi-arrow-left"></i> Back to login
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="footer-text">
+            &copy; {{ now().year }} <strong>Rootsis</strong>. All rights reserved.
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Allow only numbers in OTP input
+        document.getElementById('otp_code').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Auto-dismiss alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>
