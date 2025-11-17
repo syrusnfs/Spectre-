@@ -1,8 +1,8 @@
+<h1 align="center">Spectre - Automated Backup Management System</h1>
+
 <p align="center">
   <img src="docs/images/logo.png" alt="Spectre Logo" width="200"/>
 </p>
-
-<h1 align="center">Spectre - Automated Backup Management System</h1>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python 3.10+"/>
