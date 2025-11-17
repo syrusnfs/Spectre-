@@ -1,11 +1,8 @@
-# Spectre - Automated Backup Management System
+
+ <h1 align="center">Spectre - Automated Backup Management System</h1>
 
 <p align="center">
   <img src="docs/images/logo.png" alt="Spectre Logo" width="200"/>
-</p>
-
-<p align="center">
-  <strong>Backup management with advanced security and multi-user support</strong>
 </p>
 
 <p align="center">
@@ -100,12 +97,12 @@ sudo ./install.sh
 ```
 
 The installer will:
-- ✅ Install system dependencies (Python, Nginx, Certbot, Fail2Ban)
-- ✅ Configure SSL certificates (Let's Encrypt or self-signed)
-- ✅ Set up Nginx reverse proxy with security headers
-- ✅ Create systemd service with auto-restart
-- ✅ Configure Fail2Ban for brute-force protection
-- ✅ Initialize database and create admin user
+- Install system dependencies (Python, Nginx, Certbot, Fail2Ban)
+- Configure SSL certificates (Let's Encrypt or self-signed)
+- Set up Nginx reverse proxy with security headers
+- Create systemd service with auto-restart
+- Configure Fail2Ban for brute-force protection
+- Initialize database and create admin user
 
 **Post-Installation:**
 - Access via `https://your-domain.com`
@@ -149,8 +146,9 @@ Track backup execution in real-time and restore with one click.
 - SSD storage for database
 - Separate volume for backups
 
-## Contributions are welcome!
-## Report vulnerabilities via email to security@yourdomain.com
+#
+Contributions are welcome!
+#
 
 ## License
 
