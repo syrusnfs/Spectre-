@@ -65,7 +65,7 @@
 ```bash
 # Clone repository
 git clone https://github.com/syrusnfs/Spectre.git
-cd spectre
+cd Spectre
 
 # Create virtual environment
 python3 -m venv venv
