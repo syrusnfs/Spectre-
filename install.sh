@@ -289,7 +289,8 @@ ENCRYPTION_KEY=$ENCRYPTION_KEY
 PASSWORD_HASH_METHOD=pbkdf2:sha256:600000
 
 # SSH SECURITY
-SSH_HOST_KEY_POLICY=strict
+# Options: strict (production), warning (recommended), auto (development only)
+SSH_HOST_KEY_POLICY=warning
 SSH_KNOWN_HOSTS_PATH=~/.ssh/known_hosts
 
 # FLASK
