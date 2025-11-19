@@ -1,4 +1,4 @@
-<h1 align="center">Spectre - Automated Backup Management System</h1>
+<h1 align="center">Spectre</h1>
 
 <p align="center">
   <img src="docs/images/logo.png" alt="Spectre Logo" width="200"/>
@@ -15,7 +15,7 @@
 
 ## Overview
 
-**Spectre** is a secure, web-based backup management system that enables organizations to centrally manage automated backups of remote servers via SSH/SFTP. Built with Flask and designed for production environments, it features AES-256 encryption, two-factor authentication, role-based access control, and comprehensive audit logging.
+**Spectre** is a web-based Backup Management System that enables organizations to centrally manage automated backups of remote servers via SSH/SFTP. Built with Flask and designed for production environments, it features AES-256 encryption, two-factor authentication, role-based access control, and comprehensive audit logging.
 
 ![Dashboard](docs/images/dashboard.png)
 
