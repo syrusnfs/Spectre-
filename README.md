@@ -64,7 +64,7 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/spectre.git
+git clone https://github.com/syrusnfs/Spectre.git
 cd spectre
 
 # Create virtual environment
