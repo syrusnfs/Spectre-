@@ -1,5 +1,3 @@
-/* Based on pangolin.net dark mode design system */
-
 /* ===== GOOGLE FONTS ===== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -87,6 +85,7 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    zoom: 90%;
 }
 
 p, li, ol, ul, span, label {
@@ -778,7 +777,7 @@ textarea.form-control {
 }
 
 .bg-warning {
-    background: var(--input-bg) !important;
+    background: var(--color-warning) !important;
     color: var(--color-bg) !important;
 }
 
