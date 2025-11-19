@@ -155,6 +155,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-<p align="center">
+<p align="left">
   Made by Syrus
 </p>
