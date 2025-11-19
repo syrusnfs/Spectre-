@@ -1,4 +1,4 @@
-<h1 align="center">Spectre</h1>
+<h1 align="center">SPECTRE - Automated Backup Management System</h1>
 
 <p align="center">
   <img src="docs/images/logo.png" alt="Spectre Logo" width="200"/>
