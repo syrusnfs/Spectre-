@@ -12,8 +12,8 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-10">
-        <div class="card border-warning">
-            <div class="card-header bg-warning text-dark">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
                 <h5 class="mb-0">
                     <i class="bi bi-shield-lock-fill"></i> Backup Key (AES-256)
                     {% if is_admin_view %}
@@ -27,22 +27,22 @@
                     <strong>Verification successful!</strong> Valid OTP code.
                 </div>
 
-                <div class="card bg-light mb-4">
+                <div class="card bg-dark mb-4">
                     <div class="card-body">
-                        <h6 class="text-muted mb-3">
+                        <h6 class="text-light mb-3">
                             <i class="bi bi-lock-fill"></i> BACKUP_PASSWORD
                         </h6>
                         <div class="input-group input-group-lg">
-                            <span class="input-group-text bg-warning">
+                            <span class="input-group-text bg-secondary text-white">
                                 <i class="bi bi-shield-lock-fill"></i>
                             </span>
                             <input type="text"
-                                   class="form-control"
+                                   class="form-control bg-dark text-white"
                                    id="backupKeyField"
                                    value="{{ backup_key }}"
                                    readonly
-                                   style="font-family: monospace; font-size: 1.1rem; letter-spacing: 0.05em;">
-                            <button class="btn btn-warning" type="button" onclick="copyBackupKey()" title="Copy Backup Key">
+                                   style="font-family: monospace; font-size: 1.1rem; letter-spacing: 0.05em; border-color: #495057;">
+                            <button class="btn btn-secondary" type="button" onclick="copyBackupKey()" title="Copy Backup Key">
                                 <i class="bi bi-clipboard" id="copyIcon"></i> Copy
                             </button>
                         </div>
@@ -62,8 +62,8 @@
                     </ol>
                 </div>
 
-                <div class="card border-info">
-                    <div class="card-header bg-info text-white">
+                <div class="card border-secondary">
+                    <div class="card-header bg-secondary text-white">
                         <i class="bi bi-info-circle-fill"></i> How to Use the Backup Key
                     </div>
                     <div class="card-body">
@@ -110,14 +110,14 @@ function copyBackupKey() {
         const btn = copyIcon.parentElement;
         const originalText = btn.innerHTML;
         btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Copied!';
-        btn.classList.remove('btn-warning');
+        btn.classList.remove('btn-secondary');
         btn.classList.add('btn-success');
 
         // Restore after 3 seconds
         setTimeout(function() {
             btn.innerHTML = originalText;
             btn.classList.remove('btn-success');
-            btn.classList.add('btn-warning');
+            btn.classList.add('btn-secondary');
             copyIcon.classList.remove('bi-clipboard-check');
             copyIcon.classList.add('bi-clipboard');
         }, 3000);
