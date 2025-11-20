@@ -374,7 +374,13 @@ EOF
     chown -R "$APP_USER:$APP_USER" "$BACKUP_PATH"
     chown -R "$APP_USER:$APP_USER" /var/log/spectre
 
+    # Set secure file permissions
+    chmod 600 "$APP_DIR/instance/backups.db"
+    chmod 700 "$APP_DIR/instance"
+    chmod 700 "$BACKUP_PATH"
+
     print_success "Python configured and database initialized."
+    print_success "Secure file permissions applied."
 }
 
 setup_nginx() {
@@ -613,6 +619,115 @@ EOF
     fi
 }
 
+verify_security_permissions() {
+    print_step "SECURITY" "Verifying file permissions and ownership..."
+
+    local errors=0
+
+    # Check database file
+    if [ -f "$APP_DIR/instance/backups.db" ]; then
+        DB_PERMS=$(stat -c "%a" "$APP_DIR/instance/backups.db" 2>/dev/null || stat -f "%OLp" "$APP_DIR/instance/backups.db" 2>/dev/null)
+        if [ "$DB_PERMS" = "600" ]; then
+            print_success "Database permissions: 600 (secure)"
+        else
+            print_warning "Database permissions: $DB_PERMS (expected: 600)"
+            chmod 600 "$APP_DIR/instance/backups.db"
+            print_success "Fixed: Database permissions set to 600"
+        fi
+    else
+        print_error "Database file not found"
+        ((errors++))
+    fi
+
+    # Check .env file
+    if [ -f "$APP_DIR/.env" ]; then
+        ENV_PERMS=$(stat -c "%a" "$APP_DIR/.env" 2>/dev/null || stat -f "%OLp" "$APP_DIR/.env" 2>/dev/null)
+        if [ "$ENV_PERMS" = "600" ]; then
+            print_success ".env permissions: 600 (secure)"
+        else
+            print_warning ".env permissions: $ENV_PERMS (expected: 600)"
+            chmod 600 "$APP_DIR/.env"
+            print_success "Fixed: .env permissions set to 600"
+        fi
+    else
+        print_error ".env file not found"
+        ((errors++))
+    fi
+
+    # Check instance directory
+    if [ -d "$APP_DIR/instance" ]; then
+        INST_PERMS=$(stat -c "%a" "$APP_DIR/instance" 2>/dev/null || stat -f "%OLp" "$APP_DIR/instance" 2>/dev/null)
+        if [ "$INST_PERMS" = "700" ]; then
+            print_success "Instance directory permissions: 700 (secure)"
+        else
+            print_warning "Instance directory permissions: $INST_PERMS (expected: 700)"
+            chmod 700 "$APP_DIR/instance"
+            print_success "Fixed: Instance directory permissions set to 700"
+        fi
+    else
+        print_error "Instance directory not found"
+        ((errors++))
+    fi
+
+    # Check backup directory
+    if [ -d "$BACKUP_PATH" ]; then
+        BACKUP_PERMS=$(stat -c "%a" "$BACKUP_PATH" 2>/dev/null || stat -f "%OLp" "$BACKUP_PATH" 2>/dev/null)
+        if [ "$BACKUP_PERMS" = "700" ]; then
+            print_success "Backup directory permissions: 700 (secure)"
+        else
+            print_warning "Backup directory permissions: $BACKUP_PERMS (expected: 700)"
+            chmod 700 "$BACKUP_PATH"
+            print_success "Fixed: Backup directory permissions set to 700"
+        fi
+    else
+        print_error "Backup directory not found: $BACKUP_PATH"
+        ((errors++))
+    fi
+
+    # Check SSL private key (only for self-signed)
+    if [ -f "/etc/nginx/ssl/spectre.key" ]; then
+        SSL_PERMS=$(stat -c "%a" "/etc/nginx/ssl/spectre.key" 2>/dev/null || stat -f "%OLp" "/etc/nginx/ssl/spectre.key" 2>/dev/null)
+        if [ "$SSL_PERMS" = "600" ]; then
+            print_success "SSL private key permissions: 600 (secure)"
+        else
+            print_warning "SSL private key permissions: $SSL_PERMS (expected: 600)"
+            chmod 600 "/etc/nginx/ssl/spectre.key"
+            print_success "Fixed: SSL private key permissions set to 600"
+        fi
+    fi
+
+    # Verify ownership
+    APP_OWNER=$(stat -c "%U:%G" "$APP_DIR" 2>/dev/null || stat -f "%Su:%Sg" "$APP_DIR" 2>/dev/null)
+    if [ "$APP_OWNER" = "$APP_USER:$APP_USER" ]; then
+        print_success "Application ownership: $APP_USER:$APP_USER (correct)"
+    else
+        print_warning "Application ownership: $APP_OWNER (expected: $APP_USER:$APP_USER)"
+        chown -R "$APP_USER:$APP_USER" "$APP_DIR"
+        print_success "Fixed: Application ownership set to $APP_USER:$APP_USER"
+    fi
+
+    BACKUP_OWNER=$(stat -c "%U:%G" "$BACKUP_PATH" 2>/dev/null || stat -f "%Su:%Sg" "$BACKUP_PATH" 2>/dev/null)
+    if [ "$BACKUP_OWNER" = "$APP_USER:$APP_USER" ]; then
+        print_success "Backup directory ownership: $APP_USER:$APP_USER (correct)"
+    else
+        print_warning "Backup directory ownership: $BACKUP_OWNER (expected: $APP_USER:$APP_USER)"
+        chown -R "$APP_USER:$APP_USER" "$BACKUP_PATH"
+        print_success "Fixed: Backup directory ownership set to $APP_USER:$APP_USER"
+    fi
+
+    echo ""
+    if [ $errors -eq 0 ]; then
+        echo -e "${GREEN}╔════════════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${GREEN}║  ✓ Security verification complete!                                ║${NC}"
+        echo -e "${GREEN}║  ✓ All files and directories have secure permissions applied      ║${NC}"
+        echo -e "${GREEN}║  ✓ Ownership correctly set to $APP_USER:$APP_USER                        ║${NC}"
+        echo -e "${GREEN}╚════════════════════════════════════════════════════════════════════╝${NC}"
+    else
+        print_warning "Security verification completed with $errors errors"
+    fi
+    echo ""
+}
+
 show_summary() {
     echo ""
     echo "======================================================================"
@@ -623,6 +738,7 @@ show_summary() {
     echo "  System user:                     $APP_USER"
     echo "  Database:                        $APP_DIR/instance/backups.db"
     echo "  Backup directory:                $BACKUP_PATH"
+    echo "  Security permissions:            Verified and applied"
 
     if [ "$USE_LETSENCRYPT" = true ]; then
         echo "  SSL certificate:                 Let's Encrypt"
@@ -685,6 +801,7 @@ main() {
     setup_nginx
     setup_fail2ban
     setup_systemd
+    verify_security_permissions
     show_summary
 }
 
