@@ -42,8 +42,6 @@
 - **User Management** - Lifecycle management with audit trails
 - **Unique Backup Keys** - Each user receives encrypted backup password
 
-![Servers Management](docs/images/servers.png)
-
 ## Technology Stack
 
 - **Backend**: Flask 3.0, SQLAlchemy, Flask-Login
@@ -80,11 +78,10 @@ python3 -c "from cryptography.fernet import Fernet; print('ENCRYPTION_KEY=' + Fe
 
 # Initialize database
 python3 wsgi.py
-```
 
 Access the application at `http://localhost:5000`
+```
 
-![Backups](docs/images/backups.png)
 
 ## Production Deployment
 
@@ -114,13 +111,17 @@ The installer will:
 ### 1. Add Remote Servers
 Configure servers with SSH credentials (password or key-based authentication).
 
+![Servers Management](docs/images/servers.png)
+
 ### 2. Create Backup Routines
 Define what to backup, when, and retention policies.
+
+![Routines](docs/images/routines.png)
 
 ### 3. Monitor & Restore
 Track backup execution in real-time and restore with one click.
 
-![Routines](docs/images/routines.png)
+![Backups](docs/images/backups.png)
 
 ## Security Features
 
