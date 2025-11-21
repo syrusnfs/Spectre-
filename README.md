@@ -15,41 +15,44 @@
 
 ## Overview
 
-**Spectre** is a web-based Backup Management System that enables organizations to centrally manage automated backups of remote servers via SSH/SFTP. Built with Flask and designed for production environments, it features AES-256 encryption, two-factor authentication, role-based access control, and comprehensive audit logging.
+**Spectre** is a professional automated backup management system designed for centralized remote server backup orchestration via SSH/SFTP. Architected with production security standards, it implements AES-256 encryption, multi-factor authentication, role-based access control, and comprehensive audit trails for mission-critical data protection.
 
 ![Dashboard](docs/images/dashboard.png)
 
 ## Key Features
 
-### Security First
-- **AES-256 Encrypted Backups** - Password-protected ZIP archives
-- **Two-Factor Authentication** - TOTP-based (Google Authenticator, Authy)
-- **Encrypted Credential Storage** - Fernet encryption for server passwords and SSH keys
-- **PBKDF2-SHA256 Hashing** - 600,000 iterations (OWASP 2023 standard)
-- **Complete Audit Logging** - Track all user actions and system events
-- **HTTPS Enforcement** - Let's Encrypt integration or self-signed certificates
+### Security Architecture
+- **AES-256 Encryption** - Military-grade encryption for backup archives with password protection
+- **Multi-Factor Authentication** - TOTP implementation supporting industry-standard authenticators (Google Authenticator, Authy)
+- **Credential Protection** - Fernet-based encryption for all server credentials and SSH private keys
+- **PBKDF2-SHA256 Password Hashing** - 600,000 iterations compliant with OWASP 2023 recommendations
+- **Comprehensive Audit Trail** - Immutable logging of all authentication events and system operations
+- **TLS/SSL Enforcement** - Native Let's Encrypt integration with automatic certificate management
 
-### Backup Management
-- **Flexible Scheduling** - Daily, weekly, or manual execution
-- **Automated Retention** - Configurable cleanup policies
-- **One-Click Restoration** - Restore backups directly to source servers
-- **Real-time Monitoring** - Track backup status and disk usage
-- **Multi-Server Support** - Manage unlimited remote servers
+### Backup Operations
+- **Automated Scheduling Engine** - Cron-based execution with daily, weekly, and on-demand triggers
+- **Intelligent Retention Management** - Policy-driven lifecycle management with automatic cleanup
+- **One-Click Recovery** - Direct restoration to origin servers with integrity verification
+- **Real-Time Monitoring Dashboard** - Live status tracking with resource utilization metrics
+- **Multi-Server Architecture** - Concurrent management of distributed server infrastructure
+- **Geographic Replication** - Automated cross-server replication for disaster recovery scenarios
+- **Asynchronous Notifications** - Telegram integration for operational alerts and status updates ([Setup Guide](TELEGRAM_SETUP.md))
 
-### Multi-User Architecture
-- **Role-Based Access Control** - Admin and User roles
-- **Complete Tenant Isolation** - Users only see their own resources
-- **User Management** - Lifecycle management with audit trails
-- **Unique Backup Keys** - Each user receives encrypted backup password
+### Multi-User System
+- **Role-Based Access Control** - Hierarchical permission model with administrative and standard user roles
+- **Data Isolation** - Complete resource segregation ensuring users only access their own data
+- **User Lifecycle Management** - Full user provisioning and de-provisioning with audit compliance
+- **Per-User Encryption** - Cryptographically unique backup encryption keys for each user account
 
-## Technology Stack
+## Technical Architecture
 
-- **Backend**: Flask 3.0, SQLAlchemy, Flask-Login
-- **Security**: cryptography (Fernet), pyotp, pyzipper
-- **Remote Access**: Paramiko (SSH/SFTP)
-- **Scheduling**: APScheduler with CronTrigger
-- **Production**: Gunicorn, Nginx, Systemd, Fail2Ban
-- **Database**: SQLite (default), PostgreSQL/MySQL compatible
+- **Application Framework**: Flask 3.0 with SQLAlchemy ORM and Flask-Login session management
+- **Cryptographic Stack**: Python cryptography library (Fernet), PyOTP for TOTP, pyzipper for encrypted archives
+- **Remote Connectivity**: Paramiko SSH/SFTP client with connection pooling
+- **Task Orchestration**: APScheduler with CronTrigger-based job scheduling
+- **Notification System**: python-telegram-bot with async/await patterns
+- **Production Stack**: Gunicorn WSGI server, Nginx reverse proxy, systemd process supervision, Fail2Ban intrusion prevention
+- **Data Persistence**: SQLite with PostgreSQL/MySQL migration compatibility
 
 ## Quick Start
 
@@ -85,7 +88,7 @@ Access the application at `http://localhost:5000`
 
 ## Production Deployment
 
-Spectre includes an automated installation script for production environments:
+Spectre includes an automated installation script for production deployments:
 
 ```bash
 # Run as root
@@ -100,55 +103,63 @@ The installer will:
 - Configure Fail2Ban for brute-force protection
 - Initialize database and create admin user
 
-**Post-Installation:**
-- Access via `https://your-domain.com`
-- Enable 2FA for all users (recommended)
-- Configure backup retention policies
-- Add remote servers and create routines
+**Post-Installation Steps:**
+- Access the application via `https://your-domain.com`
+- Enable two-factor authentication for enhanced security (recommended)
+- Configure backup retention policies based on your requirements
+- Register remote servers and define backup routines
+- Set up Telegram notifications for real-time operational alerts (optional)
 
 ## Usage
 
-### 1. Add Remote Servers
-Configure servers with SSH credentials (password or key-based authentication).
+### 1. Server Registration
+Register remote servers with SSH credentials supporting both password and key-based authentication methods.
 
 ![Servers Management](docs/images/servers.png)
 
-### 2. Create Backup Routines
-Define what to backup, when, and retention policies.
+### 2. Backup Routine Configuration
+Define backup targets, scheduling parameters, and data retention policies.
 
 ![Routines](docs/images/routines.png)
 
-### 3. Monitor & Restore
-Track backup execution in real-time and restore with one click.
+### 3. Monitoring and Recovery
+Monitor backup execution status in real-time and perform one-click restoration operations.
 
 ![Backups](docs/images/backups.png)
 
-## Security Features
+### 4. Notification Configuration (Optional)
+Configure Telegram integration to receive real-time alerts for backup operations, system events, and critical status changes. Refer to [TELEGRAM_SETUP.md](TELEGRAM_SETUP.md) for detailed configuration instructions.
 
-- **Input Validation** - Comprehensive sanitization for all user inputs
-- **Path Traversal Prevention** - Secure file path validation
-- **IDOR Protection** - Authorization checks on all endpoints
-- **Session Security** - Automatic regeneration and secure cookies
-- **Timing Attack Prevention** - Constant-time comparisons
-- **HTTPS Only** - Automatic HTTP → HTTPS redirection
-- **Security Headers** - CSP, HSTS, X-Frame-Options, X-Content-Type-Options
+### 5. Backup Replication Configuration
+Enable automatic replication of backup archives to secondary storage locations for enhanced data redundancy and disaster recovery capabilities.
+
+## Security Implementation
+
+- **Input Validation** - Comprehensive sanitization and validation for all user-supplied data
+- **Path Traversal Prevention** - Secure file path validation preventing directory traversal attacks
+- **Authorization Enforcement** - Strict authorization checks preventing insecure direct object references
+- **Session Management** - Automatic session regeneration with secure, HTTP-only cookie implementation
+- **Timing Attack Mitigation** - Constant-time comparison operations for sensitive data
+- **Transport Security** - Enforced HTTPS with automatic HTTP-to-HTTPS redirection
+- **Security Headers** - Comprehensive security headers including CSP, HSTS, X-Frame-Options, and X-Content-Type-Options
+- **Credential Protection** - AES-256 encryption for Telegram API credentials with integrity validation
 
 ## System Requirements
 
-### Minimum
+### Minimum Specifications
 - 2 CPU cores
 - 2GB RAM
-- 20GB storage (+ backup space)
+- 20GB system storage (excluding backup data storage)
 
-### Recommended
+### Recommended Specifications
 - 4 CPU cores
 - 4GB RAM
-- SSD storage for database
-- Separate volume for backups
+- SSD-based storage for database operations
+- Dedicated storage volume for backup archives
 
-#
-Contributions are welcome!
-#
+## Contributing
+
+Contributions to this project are welcome. Please submit pull requests or open issues for bugs and feature requests.
 
 ## License
 
@@ -159,3 +170,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 <p align="left">
   Made by Syrus
 </p>
+
